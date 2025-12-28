@@ -1,0 +1,6 @@
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: "/etc/letsencrypt/live/{{ domains[0] }}/fullchain.pem"
+        keyFile: "/etc/letsencrypt/live/{{ domains[0] }}/privkey.pem"

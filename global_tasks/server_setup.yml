@@ -1,0 +1,10 @@
+- name: Run unattended-upgrades installation
+  include_tasks: ../../global_tasks/install_ua.yml
+
+- name: Run Docker installation
+  include_tasks: ../../global_tasks/install_docker.yml
+
+- name: Create root folder
+  file:
+    path: "{{ root_folder }}"
+    state: directory

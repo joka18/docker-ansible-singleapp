@@ -1,0 +1,21 @@
+http:
+  routers:
+    mainwp:
+      rule: "Host(`wordpress.local.example.com`)"
+      entryPoints:
+        - websecure
+      service: wordpress
+      tls:
+        {}
+    altdomainwp:
+      rule: "Host(`wp-2.local.example.com`)"
+      entryPoints:
+        - websecure
+      service: wordpress
+      tls:
+        {}
+  services:
+    wordpress:
+      loadBalancer:
+        servers:
+          - url: "http://wordpress"

@@ -1,0 +1,34 @@
+---
+- hosts: servers
+  become: true
+
+  vars:
+    root_folder: /opt/wordpress
+    traefik_cf: false
+    traefik_certapi: true
+    use_custom_traefik_config: true
+    domains:
+          - "wordpress.local.example.com"
+          - "wp-2.local.example.com"
+
+  tasks:
+    - name: Server setup
+      include_tasks: ../../global_tasks/server_setup.yml
+
+    - name: Create blank app config folder if it doesn't exist
+      file:
+        path: "{{ root_folder }}/data"
+        state: directory
+
+    - name: Get certs from certapi
+      vars:
+        api_token: "{{ lookup('env', 'CERTAPI_TOKEN') }}"
+      include_tasks: ../../global_tasks/certapi_certbot.yml
+
+    - name: Copy custom traefik http config to folder
+      template:
+        src: ./templates/traefik-router.yml
+        dest: "{{ root_folder }}/traefik-config.yml"
+
+    - name: Standard app tasks
+      include_tasks: ../../global_tasks/std_app_tasks.yml

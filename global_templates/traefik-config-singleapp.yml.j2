@@ -1,0 +1,22 @@
+http:
+  routers:
+    rtr1:
+      entryPoints:
+        - websecure
+      rule: "Host(`{{ app_domain }}`)"
+      service: svc1
+      {% if traefik_cf is defined and traefik_cf %}
+      tls:
+        certResolver: production
+      {% endif %}
+      {% if traefik_certapi is defined and traefik_certapi %}
+      tls:
+        {}
+      {% endif %}
+
+
+  services:
+    svc1:
+      loadBalancer:
+        servers:
+          - url: "{{ proxy_url | default('http://null')}}"

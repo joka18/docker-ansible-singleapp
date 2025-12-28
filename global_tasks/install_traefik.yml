@@ -1,0 +1,85 @@
+# Traefik HTTP config
+- name: Copy Traefik http configuration file to server
+  template:
+    src: ../../global_templates/traefik-config-singleapp.yml.j2
+    dest: "{{ root_folder }}/traefik-config.yml"
+  when: use_custom_traefik_config is not defined or not use_custom_traefik_config
+
+
+# Traefik general config
+- name: Copy Traefik with CF configuration to server
+  template:
+    src: ../../global_templates/traefik-withcf.yml
+    dest: "{{ root_folder }}/traefik.yml"
+  when: traefik_cf is defined and traefik_cf
+
+- name: Create Traefik certs directory
+  file:
+    path: "{{ root_folder }}/traefik-certs"
+    state: directory
+  when: traefik_cf is defined and traefik_cf
+
+- name: Copy Traefik without CF configuration to server
+  template:
+    src: ../../global_templates/traefik-nocf.yml
+    dest: "{{ root_folder }}/traefik.yml"
+  when: (traefik_cf is not defined or not traefik_cf) and (traefik_certapi is not defined or traefik_certapi)
+
+
+# Traefik docker compose config
+- name: Add traefik to the docker compose file
+  when: (traefik_certapi is not defined or not traefik_certapi) and (traefik_cf is defined and traefik_cf)
+  vars:
+    traefik_compose_block: |
+        traefik:
+          image: traefik:latest
+          container_name: traefik
+          volumes:
+            - ./traefik.yml:/etc/traefik/traefik.yml
+            - "./traefik-config.yml:/etc/traefik/config/config.yml"
+            - ./traefik-certs:/etc/traefik/certs
+          ports:
+            - "80:80"
+            - "443:443"
+          env_file:
+            - .traefik-dotenv
+          restart: unless-stopped
+  ansible.builtin.blockinfile:
+    path: "{{ root_folder }}/docker-compose.yml"
+    block: "{{ traefik_compose_block | indent(2, true) }}"
+    marker: "# {mark} TRAEFIK COMPOSE BLOCK"
+    create: yes
+
+- name: Add traefik to the docker compose file
+  when: traefik_certapi is defined and traefik_certapi
+  vars:
+    traefik_compose_block: |
+        traefik:
+          image: traefik:latest
+          container_name: traefik
+          volumes:
+            - ./traefik.yml:/etc/traefik/traefik.yml
+            - "./traefik-config.yml:/etc/traefik/config/config.yml"
+            - /etc/letsencrypt:/etc/letsencrypt:ro
+            - ./traefik-tls.yml:/etc/traefik/config/traefik-tls.yml
+          ports:
+            - "80:80"
+            - "443:443"
+          restart: unless-stopped
+  ansible.builtin.blockinfile:
+    path: "{{ root_folder }}/docker-compose.yml"
+    block: "{{ traefik_compose_block | indent(2, true) }}"
+    marker: "# {mark} TRAEFIK COMPOSE BLOCK"
+    create: yes
+
+- name: cf token
+  when: traefik_cf is defined and traefik_cf
+  vars:
+    envfile_dest: "{{ root_folder }}/.traefik-dotenv"
+  include_tasks: ../../global_tasks/cf-dotenv.yml
+
+- name: traefik tls
+  when: traefik_certapi is defined and traefik_certapi
+  template:
+    src: ../../global_templates/traefik-tls.yml.j2
+    dest: "{{ root_folder }}/traefik-tls.yml"

@@ -1,0 +1,11 @@
+- name: push docker compose file
+  include_tasks: ../../global_tasks/docker-compose-push.yml
+
+- name: set up traefik
+  include_tasks: ../../global_tasks/install_traefik.yml
+
+- name: docker update cron
+  include_tasks: ../../global_tasks/docker-update-cron.yml
+
+- name: docker restart and start
+  include_tasks: ../../global_tasks/docker-restart-start.yml

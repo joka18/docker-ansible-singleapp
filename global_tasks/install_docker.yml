@@ -1,0 +1,8 @@
+- name: Check if Docker is installed
+  command: docker --version
+  register: docker_check
+  ignore_errors: yes
+
+- name: Include Docker install tasks if Docker is not installed
+  include_tasks: ../../global_tasks/install_docker_full.yml
+  when: docker_check.rc != 0

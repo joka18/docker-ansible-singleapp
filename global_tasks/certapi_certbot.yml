@@ -1,0 +1,33 @@
+- name: prepare dotenv
+  when: api_token is defined
+  template:
+    src: "{{ envfile_template | default('../../global_templates/certapi-dotenv.j2') }}"
+    dest: "{{ envfile_dest | default(root_folder + '/.env') }}"
+
+- name: Install sudo
+  apt:
+    name: sudo
+    state: present
+    cache_valid_time: 3600
+
+- name: Request certificate for all domains via certapi
+  shell: |
+    set -aeuo pipefail
+    set -x
+    . {{ root_folder }}/.env
+
+    http_status=$(curl -s -o /dev/null -w "%{http_code}" -L https://certapi.local.example.com/scripts/setup.sh)
+    if [ "$http_status" = "200" ]; then
+      curl -L https://certapi.local.example.com/scripts/setup.sh | sudo -E bash -s -- {{ item_args }}
+    else
+      echo "Error: setup.sh not found or unavailable (status $http_status)"
+      exit 1
+    fi
+  args:
+    executable: /bin/bash
+  vars:
+    item_args: >-
+      {{ domains | map('regex_replace', '^(.*)$', '-d \1') | join(' ') }}
+      {% if deploy_hook is defined %}
+      --deploy-hook '{{ deploy_hook }}'
+      {% endif %}

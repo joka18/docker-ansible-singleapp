@@ -1,0 +1,34 @@
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false 
+
+entryPoints:
+  web:
+    address: :80
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+
+  websecure:
+    address: :443
+
+serversTransport:
+  insecureSkipVerify: true
+
+certificatesResolvers:
+  production:
+    acme:
+      email: mail@example.com
+      storage: /etc/traefik/certs/acme.json
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
+      dnsChallenge:
+        provider: cloudflare
+
+providers:
+  docker:
+    exposedByDefault: false 
+  file:
+    directory: /etc/traefik
+    watch: true

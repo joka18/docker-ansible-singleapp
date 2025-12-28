@@ -1,0 +1,7 @@
+- name: Replace cf token only if APP_CF_TOKEN is set in the environment
+  when: lookup('env', 'APP_CF_TOKEN') != ''
+  vars:
+    cf_token: "{{ lookup('env', 'APP_CF_TOKEN') }}"
+  template:
+    src: "{{ envfile_template | default('../../global_templates/cf-dotenv.j2') }}"
+    dest: "{{ envfile_dest | default(root_folder + '/.cf-dotenv') }}"

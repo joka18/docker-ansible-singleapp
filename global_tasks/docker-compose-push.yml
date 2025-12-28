@@ -1,0 +1,5 @@
+- name: push docker compose file to server
+  template:
+    src: ../templates/docker-compose.yml
+    dest: "{{ root_folder }}/docker-compose.yml"
+  when: skip_docker_compose_push is not defined or not skip_docker_compose_push

@@ -1,0 +1,13 @@
+- name: Install cron
+  apt:
+    name: cron
+    state: present
+
+- name: Schedule weekly cron job for docker re-pull and restart
+  cron:
+    name: "update containers"
+    minute: "0"
+    hour: "3"
+    weekday: "0"
+    job: "cd {{ root_folder }} && docker compose pull && docker compose up -d --build"
+    user: root
