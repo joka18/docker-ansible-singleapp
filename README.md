@@ -13,7 +13,7 @@ Two examples are included. See example for deploying Grafana or Wordpress in the
 | Variable Name | Type | Description | Example|
 |-|-|-|-|
 |```root_folder``` | String | The directory for the given app. |  ```/opt/appname``` |
-| ```traefik_cf```  | Bool | Make Traefik get certificates via Cloudflare DNS-01. Requires a CertAPI token via env var ```APP_CF_TOKEN```. ||
+| ```traefik_cf```  | Bool | Make Traefik get certificates via Cloudflare DNS-01. Requires a Cloudflare token via env var ```APP_CF_TOKEN```. ||
 | ```traefik_certapi``` | Bool | Make Traefik get certificates via [CertAPI](https://github.com/joka18/certapi). Requires a CertAPI token via env var ```CERTAPI_TOKEN```. ||
 | ```use_custom_traefik_config``` | Bool | Use a custom Traefik config router config. Skips automatic traefik router config. ||
 | ```domains``` | List | Domains for which to request a certificate or (if applicable) set up the traefik router for. | ```yaml list``` |
